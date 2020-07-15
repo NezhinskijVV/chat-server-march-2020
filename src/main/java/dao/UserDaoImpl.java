@@ -1,28 +1,37 @@
 package dao;
 
+import lombok.SneakyThrows;
 import model.User;
 
 import java.sql.*;
 
 public class UserDaoImpl implements UserDao {
+    private final String DB_URL = "jdbc:MySQL://localhost:3306/my_schema?serverTimezone=UTC";
+    private final String DB_USER = "root";
+    private final String DB_PASSWORD = "12345678";
 
+    @SneakyThrows
     @Override
     public User findByName(String name) {
-        try (Connection connection = DriverManager.getConnection("jdbc:MySQL://localhost:3306/my_schema?serverTimezone=UTC",
-                "root", "12345678");
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT login, password from USER");
-        ) {
-            while (resultSet.next()) {
-//                System.out.println(resultSet.getString("login") + " ");
-                if (name.equalsIgnoreCase(resultSet.getString("login"))) {
-                    return new User(name, resultSet.getString("password"));
-                }
+        ResultSet resultSet = getStatement().executeQuery("SELECT login, password from USER");
+        while (resultSet.next()) {
+            if (name.equalsIgnoreCase(resultSet.getString("login"))) {
+                return new User(name, resultSet.getString("password"));
             }
-        } catch (SQLException exc) {
-            exc.printStackTrace();
         }
         return null;
+    }
+
+    @SneakyThrows
+    @Override
+    public void createUser(User user) {
+        getStatement().executeUpdate("INSERT INTO USER(login, password) VALUES ('"
+                + user.getName() + "','" + user.getPassword() + "') ");
+    }
+
+    private Statement getStatement() throws SQLException {
+        Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        return connection.createStatement();
     }
 }
 
