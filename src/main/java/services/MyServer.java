@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MyServer implements Observable {
-    public static final int PORT = 8080;
+    public static final int PORT = 8081;
     private volatile static List<Observer> clients = new ArrayList<>();
 
     @SneakyThrows
